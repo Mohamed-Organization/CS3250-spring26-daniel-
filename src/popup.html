@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <div class="container">
+      <h2>Anonymous Theme Switcher</h2>
+
+      <p class="status">Ready to capture themes.</p>
+      
+      <div class="input-section">
+          <input type="text" id="theme-name" placeholder="Theme Name (e.g., Ginger Cat)">
+          <input type="text" id="group-name" placeholder="Group Name (e.g., Cats)">
+          <input type="file" id="image-upload" accept="image/*">
+      </div>
+
+      <button id="save-btn">Save & Match Colors</button>
+      
+      <hr>
+      
+      <h3>Saved Themes</h3>
+      <div id="popup-content">
+        <p class="status">Loading your Groups...</p>
+      </div>
+
+      <hr>
+      <button id="shutdown" class="secondary-btn">Exit Extension</button>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
