@@ -11,6 +11,7 @@ let lockedInTheme = null;   // Remembers what theme you actually clicked
  * INITIALIZE POPUP
  * Main function that clears the UI and builds the list of grouped themes.
  */
+// this function has some asistance from ai
 async function initializePopup() {
     const currentDiv = document.getElementById('popup-content');
     if (!currentDiv) return;
@@ -28,15 +29,12 @@ async function initializePopup() {
     }
 
     // 3. Create a Sorting Object (The "Group Map")
-    // This turns our flat list into: { "SOULS": [theme1], "JUNGLE": [theme2] }
     const themeGroups = {};
-
     savedThemes.forEach(savedItem => {
-        const groupName = savedItem.group.toUpperCase(); // Force uppercase for the "Pro" look
+        const groupName = savedItem.group.toUpperCase(); 
         if (!themeGroups[groupName]) {
             themeGroups[groupName] = [];
         }
-        
         const match = installedThemes.find(t => t.id === savedItem.id);
         if (match) {
             themeGroups[groupName].push(match);
@@ -48,31 +46,66 @@ async function initializePopup() {
         const groupWrapper = document.createElement('div');
         groupWrapper.className = 'group-container';
 
+        // Header Container for Title + Delete Group Button
+        const headerContainer = document.createElement('div');
+        headerContainer.className = 'group-header-container';
+        headerContainer.style.display = "flex"; // Puts them on the same line
+
         const header = document.createElement('button');
         header.className = 'group-header';
+        header.style.flex = "1"; // Makes the title take up the most space
         header.textContent = groupName + " (" + themeGroups[groupName].length + ")";
+
+        // Inside your initializePopup loop
+        const delGroupBtn = document.createElement('button');
+        delGroupBtn.textContent = "×"; // Changed from "DELETE GROUP" to just "×"
+        delGroupBtn.className = 'delete-group-btn';
+        // used gemini for the next couple lines
+        delGroupBtn.onclick = (e) => {
+            e.stopPropagation(); // Stops the folder from toggling
+            handleDeleteGroup(groupName);
+        };
 
         const contentArea = document.createElement('div');
         contentArea.className = 'group-content';
-        contentArea.style.display = "none"; // Hidden by default
+        contentArea.style.display = "none"; 
 
-        // Add the theme buttons into the group
+        // Loop that adds the Theme + Remove "x" Button
+        // used gemini for this
         themeGroups[groupName].forEach(theme => {
-            contentArea.appendChild(buildMenuItem(theme, true));
+            const row = document.createElement('div');
+            row.className = 'theme-item-row';
+            row.style.display = "flex"; 
+            row.style.alignItems = "center";
+
+            const themeBtn = buildMenuItem(theme); // Your original button
+            themeBtn.style.flex = "1";
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = "×"; // asked gemini for support here
+            removeBtn.className = 'remove-item-btn';
+            // Calls your new function at the bottom
+            removeBtn.onclick = () => handleRemoveTheme(theme.id, groupName);
+
+            row.appendChild(themeBtn);
+            row.appendChild(removeBtn);
+            contentArea.appendChild(row);
         });
 
-        // Click to Toggle: Opens or closes the group
+        // Click to Toggle Logic
         header.addEventListener('click', () => {
             if (contentArea.style.display === "none") {
                 contentArea.style.display = "block";
-                header.textContent = groupName; // Minimalist text when open
+                header.textContent = groupName; 
             } else {
                 contentArea.style.display = "none";
                 header.textContent = groupName + " (" + themeGroups[groupName].length + ")";
             }
         });
 
-        groupWrapper.appendChild(header);
+        headerContainer.appendChild(header);
+        headerContainer.appendChild(delGroupBtn);
+        groupWrapper.appendChild(headerContainer);
         groupWrapper.appendChild(contentArea);
         currentDiv.appendChild(groupWrapper);
     }
@@ -85,7 +118,7 @@ async function initializePopup() {
     installedThemes.forEach(theme => {
         const isAlreadySaved = savedThemes.some(s => s.id === theme.id);
         if (!isAlreadySaved) {
-            currentDiv.appendChild(buildMenuItem(theme, false));
+            currentDiv.appendChild(buildMenuItem(theme));
         }
     });
 }
@@ -94,16 +127,13 @@ async function initializePopup() {
  * BUILD MENU ITEM
  * Creates the individual buttons for each theme with hover-preview logic.
  */
-function buildMenuItem(theme, isSaved) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'theme-item-wrapper';
-
-    const nameSpan = document.createElement('span');
-    nameSpan.textContent = theme.name;
-    nameSpan.className = 'theme-name';
+function buildMenuItem(theme) {
+    const btn = document.createElement('button');
+    btn.textContent = theme.name;
+    btn.className = 'theme-button';
 
     // HOVER: Show a quick preview without changing settings permanently
-    wrapper.addEventListener('mouseenter', async () => {
+    btn.addEventListener('mouseenter', async () => {
         const allAddons = await browser.management.getAll();
         const currentActive = allAddons.find(a => a.type === 'theme' && a.enabled);
         
@@ -114,14 +144,14 @@ function buildMenuItem(theme, isSaved) {
     });
 
     // LEAVE: Put back the original theme unless the user clicked
-    wrapper.addEventListener('mouseleave', async () => {
+    btn.addEventListener('mouseleave', async () => {
         if (originalThemeId) {
             await browser.management.setEnabled(originalThemeId, true);
         }
     });
 
     // CLICK: Lock it in permanently
-    wrapper.addEventListener('click', async () => {
+    btn.addEventListener('click', async () => {
         originalThemeId = null; // Clear the memory so 'mouseleave' doesn't undo the click
         lockedInTheme = theme;   
         
@@ -131,33 +161,7 @@ function buildMenuItem(theme, isSaved) {
         document.getElementById('theme-name').value = theme.name;
     });
 
-    wrapper.appendChild(nameSpan);
-
-    if (isSaved) {
-        const delBtn = document.createElement('span');
-        delBtn.className = 'delete-btn';
-        delBtn.textContent = '✕';
-        
-        delBtn.addEventListener('click', async (e) => {
-            e.stopPropagation(); 
-            const data = await browser.storage.local.get('userThemes');
-            const list = data.userThemes || [];
-            const updated = list.filter(item => item.id !== theme.id);
-            await browser.storage.local.set({ userThemes: updated });
-            initializePopup();
-        });
-
-        delBtn.addEventListener('mouseenter', () => {
-            wrapper.classList.add('no-hover');
-        });
-        delBtn.addEventListener('mouseleave', () => {
-            wrapper.classList.remove('no-hover');
-        });
-
-        wrapper.appendChild(delBtn);
-    }
-
-    return wrapper;
+    return btn;
 }
 
 /**
@@ -184,11 +188,10 @@ async function saveTheme() {
     };
 
     savedList.push(newEntry);
-    await browser.storage.local.set({ userThemes: savedList }); 
+    await browser.storage.local.set({ userThemes: savedList }); //
     
-    // Refresh the list immediately
     statusMsg.textContent = "Saved to " + groupName + "!";
-    initializePopup(); 
+    initializePopup(); // Refresh the list immediately
 }
 
 /**
@@ -205,4 +208,53 @@ if (saveBtn) {
 const shutdown = document.getElementById('shutdown');
 if (shutdown) {
     shutdown.addEventListener('click', () => window.close());
+}
+
+/**
+ * Function 1: Deletes an ENTIRE category
+ */
+async function handleDeleteGroup(groupName) {
+    // A simple pop-up to make sure you don't delete your hard work by accident
+    const check = confirm("Delete the " + groupName + " group?");
+    
+    if (check) {
+        // Step 1: Get the current list from Firefox storage
+        const data = await browser.storage.local.get('userThemes');
+        const savedThemes = data.userThemes || [];
+        
+        // Step 2: Sift through the list and keep only the themes in OTHER groups
+        // This effectively "deletes" the group you clicked
+        const updatedList = savedThemes.filter(function(theme) {
+            return theme.group.toUpperCase() !== groupName.toUpperCase();
+        });
+        
+        // Step 3: Save the new, smaller list back to storage
+        await browser.storage.local.set({ userThemes: updatedList });
+        
+        // Step 4: Redraw the popup so the group disappears instantly
+        initializePopup(); 
+    }
+}
+
+/**
+ * Function 2: Removes just ONE theme from a specific group
+ */
+async function handleRemoveTheme(themeId, groupName) {
+    // Step 1: Grab the saved list
+    const data = await browser.storage.local.get('userThemes');
+    const savedThemes = data.userThemes || [];
+    
+    // Step 2: Use .filter to remove ONLY the match for this ID and this Group
+    // It says: "Keep the theme if it's a different ID OR in a different group"
+    const updatedList = savedThemes.filter(function(theme) {
+        const sameId = (theme.id === themeId);
+        const sameGroup = (theme.group.toUpperCase() === groupName.toUpperCase());
+        
+        // Only return true if it's NOT the exact one we want to remove
+        return !(sameId && sameGroup);
+    });
+    
+    // Step 3: Save and refresh the UI
+    await browser.storage.local.set({ userThemes: updatedList });
+    initializePopup();
 }
