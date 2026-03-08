@@ -196,16 +196,20 @@ button:hover {
 .delete-group-btn {
     background: none;
     border: none;
-    color: #444; /* Subtle gray so it doesn't distract from the game titles */
+    color: #ff4d4d; /* keeping it red so its obvious what it does */
     font-size: 18px;
     cursor: pointer;
-    padding: 0 15px; 
-    width: auto; /* Ensures it only takes the space it needs */
+    padding: 0 15px;
+    width: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* stops the x from floating weird */
     transition: color 0.2s;
+    margin-top: 0; /* overrides the global button margin */
 }
 
 .delete-group-btn:hover {
-    color: #ff4d4d; /* Only pops red when you're about to delete */
+    color: #ff0000;
 }
 
 /* The container for the theme and the delete 'x' */
@@ -217,10 +221,26 @@ button:hover {
     border-bottom: 1px solid #1a1a1a;
 }
 
-/* THE FIX: This forces the theme name to take up every bit of space */
+/* the little ≡ grip icon on the left side of each theme row */
+.drag-handle {
+    color: #555;
+    font-size: 14px;
+    padding: 0 8px;
+    cursor: grab;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    user-select: none; /* stops it from getting highlighted when you click fast */
+}
+
+.drag-handle:hover {
+    color: #00f3ff;
+}
+
+/* Theme name button inside a row */
 .theme-item-row .theme-button {
-    flex-grow: 1; /* Tells the button: 'Take all the room!' */
-    flex-shrink: 1; /* Allows it to get smaller only if the window is tiny */
+    flex-grow: 1; /* takes up all the space between the handle and the x */
+    flex-shrink: 1;
     text-align: left;
     background: none;
     border: none;
@@ -230,23 +250,28 @@ button:hover {
     cursor: pointer;
     overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis; /* Adds '...' if the horror game name is too long */
+    text-overflow: ellipsis; /* cuts off really long names with ... instead of breaking layout */
+    margin-top: 0;
 }
 
-/* THE FIX: This makes the 'x' button stay tiny and on the far right */
+/* the x on each theme row - made it red straight away so you can see it */
 .remove-item-btn {
-    flex-shrink: 0; /* Tells the 'x': 'Do NOT let the name squish you!' */
+    flex-shrink: 0; /* same idea as the other buttons, dont let it get squished */
     background: none;
     border: none;
-    color: #444; /* Subtle until hover */
+    color: #ff4d4d;
     font-size: 18px;
     font-weight: bold;
     cursor: pointer;
     padding: 0 15px;
-    width: 40px; /* Gives it a fixed, predictable 'hit zone' */
-    text-align: center;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    transition: color 0.2s;
 }
 
 .remove-item-btn:hover {
-    color: #ff4d4d;
+    color: #ff0000;
 }

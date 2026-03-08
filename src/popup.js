@@ -42,9 +42,39 @@ async function initializePopup() {
     });
 
     // 4. Build the Expandable UI (Accordion)
+    if (Object.keys(themeGroups).length === 0) {
+        const emptyMsg = document.createElement('p');
+        emptyMsg.className = 'status';
+        emptyMsg.textContent = "No saved groups yet!";
+        currentDiv.appendChild(emptyMsg);
+    }
+
     for (const groupName in themeGroups) {
         const groupWrapper = document.createElement('div');
         groupWrapper.className = 'group-container';
+
+        // prompted claude to guide me on how to implement a drag and drop feature
+        // lets the group folder act as a drop target when dragging themes around
+        groupWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault(); 
+            groupWrapper.classList.add('drag-over');
+        });
+
+        groupWrapper.addEventListener('dragleave', () => {
+            groupWrapper.classList.remove('drag-over');
+        });
+
+        groupWrapper.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            groupWrapper.classList.remove('drag-over');
+            
+            const themeId = e.dataTransfer.getData('text/plain');
+            const themeName = e.dataTransfer.getData('themeName');
+            
+            if (themeId) {
+                await moveThemeToGroup(themeId, themeName, groupName);
+            }
+        });
 
         // Header Container for Title + Delete Group Button
         const headerContainer = document.createElement('div');
@@ -70,23 +100,24 @@ async function initializePopup() {
         contentArea.className = 'group-content';
         contentArea.style.display = "none"; 
 
-        // Loop that adds the Theme + Remove "x" Button
-        // used gemini for this
+        // Loop that adds drag handle + Theme + Remove "x" Button
         themeGroups[groupName].forEach(theme => {
             const row = document.createElement('div');
             row.className = 'theme-item-row';
-            row.style.display = "flex"; 
-            row.style.alignItems = "center";
 
-            const themeBtn = buildMenuItem(theme); // Your original button
+            const handle = document.createElement('span');
+            handle.className = 'drag-handle';
+            handle.textContent = '≡';
+
+            const themeBtn = buildMenuItem(theme);
             themeBtn.style.flex = "1";
 
             const removeBtn = document.createElement('button');
-            removeBtn.textContent = "×"; // asked gemini for support here
+            removeBtn.textContent = "×";
             removeBtn.className = 'remove-item-btn';
-            // Calls your new function at the bottom
             removeBtn.onclick = () => handleRemoveTheme(theme.id, groupName);
 
+            row.appendChild(handle);
             row.appendChild(themeBtn);
             row.appendChild(removeBtn);
             contentArea.appendChild(row);
@@ -118,7 +149,28 @@ async function initializePopup() {
     installedThemes.forEach(theme => {
         const isAlreadySaved = savedThemes.some(s => s.id === theme.id);
         if (!isAlreadySaved) {
-            currentDiv.appendChild(buildMenuItem(theme));
+            const row = document.createElement('div');
+            row.className = 'theme-item-row';
+
+            const handle = document.createElement('span');
+            handle.className = 'drag-handle';
+            handle.textContent = '≡';
+
+            const themeBtn = buildMenuItem(theme);
+            themeBtn.style.flex = "1";
+
+            // For ungrouped, the × saves to a "removed" list or just does nothing visually
+            // Here we just hide the row as a soft remove (they can re-appear on reload)
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = "×";
+            removeBtn.className = 'remove-item-btn';
+            removeBtn.title = "Hide from ungrouped";
+            removeBtn.onclick = () => { row.remove(); };
+
+            row.appendChild(handle);
+            row.appendChild(themeBtn);
+            row.appendChild(removeBtn);
+            currentDiv.appendChild(row);
         }
     });
 }
@@ -131,6 +183,20 @@ function buildMenuItem(theme) {
     const btn = document.createElement('button');
     btn.textContent = theme.name;
     btn.className = 'theme-button';
+
+    // prompted claude to guide me on how to implement a drag and drop feature
+    // drag setup - stores the theme id so the drop target knows what got dragged
+    btn.draggable = true;
+    
+    btn.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', theme.id);
+        e.dataTransfer.setData('themeName', theme.name);
+        btn.classList.add('dragging');
+    });
+
+    btn.addEventListener('dragend', () => {
+        btn.classList.remove('dragging');
+    });
 
     // HOVER: Show a quick preview without changing settings permanently
     btn.addEventListener('mouseenter', async () => {
@@ -256,5 +322,26 @@ async function handleRemoveTheme(themeId, groupName) {
     
     // Step 3: Save and refresh the UI
     await browser.storage.local.set({ userThemes: updatedList });
+    initializePopup();
+}
+
+// move theme drop handler
+async function moveThemeToGroup(themeId, themeName, targetGroupName) {
+    const data = await browser.storage.local.get('userThemes');
+    let savedThemes = data.userThemes || [];
+    
+    const existingIndex = savedThemes.findIndex(t => t.id === themeId);
+    
+    if (existingIndex !== -1) {
+        savedThemes[existingIndex].group = targetGroupName;
+    } else {
+        savedThemes.push({
+            id: themeId,
+            name: themeName,
+            group: targetGroupName
+        });
+    }
+    
+    await browser.storage.local.set({ userThemes: savedThemes });
     initializePopup();
 }
