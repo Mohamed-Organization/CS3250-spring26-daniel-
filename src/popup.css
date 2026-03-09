@@ -221,7 +221,7 @@ button:hover {
     border-bottom: 1px solid #1a1a1a;
 }
 
-/* the little ≡ grip icon on the left side of each theme row */
+/* The little "≡" icon on the left side of each theme row */
 .drag-handle {
     color: #555;
     font-size: 14px;
@@ -254,7 +254,7 @@ button:hover {
     margin-top: 0;
 }
 
-/* the x on each theme row - made it red straight away so you can see it */
+/* the x on each theme row. Made it red straight away */
 .remove-item-btn {
     flex-shrink: 0; /* same idea as the other buttons, dont let it get squished */
     background: none;
