@@ -42,12 +42,6 @@ input[type="text"]:focus {
     box-shadow: 0 0 5px #00ff9d;
 }
 
-/* Styling the File Upload */
-input[type="file"] {
-    font-size: 0.8rem;
-    color: #888;
-    padding: 5px 0;
-}
 
 /* Button Styling */
 button {
