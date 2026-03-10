@@ -77,7 +77,7 @@ async function broadcastSetBackground(url) {
 	for (const t of tabs) {
 		try {
 			await browser.tabs.sendMessage(t.id, { type: 'setBackground', url });
-		} catch (err) {
+		} catch (_err) {
 			// ignore tabs that don't have the content script
 		}
 	}
@@ -114,7 +114,7 @@ browser.alarms.onAlarm.addListener(async (alarm) => {
  * @param {Object} sender - Info about the sender (tab, extension, etc).
  * @returns {Promise<Object|undefined>} Resolves with a response object or undefined.
  */
-browser.runtime.onMessage.addListener(async (msg, sender) => {
+browser.runtime.onMessage.addListener(async (msg, _sender) => {
 	if (!msg || !msg.type) return;
 	if (msg.type === 'getState') {
 		const store = await getStorage([STORAGE_KEYS.GROUPS, STORAGE_KEYS.ACTIVE_GROUP, STORAGE_KEYS.CURRENT_INDEX]);
@@ -162,7 +162,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
  * @param {string} details.reason - The reason for the event ('install', 'update', etc).
  * @returns {Promise<void>} Resolves after checking and optionally setting default data.
  */
-browser.runtime.onInstalled.addListener(async (details) => {
+browser.runtime.onInstalled.addListener(async (_details) => {
 	const store = await getStorage([STORAGE_KEYS.GROUPS, STORAGE_KEYS.ACTIVE_GROUP]);
 	if (!store[STORAGE_KEYS.GROUPS]) {
 		await setStorage({ [STORAGE_KEYS.GROUPS]: DEFAULT_GROUPS, [STORAGE_KEYS.ACTIVE_GROUP]: DEFAULT_GROUPS[0].id });

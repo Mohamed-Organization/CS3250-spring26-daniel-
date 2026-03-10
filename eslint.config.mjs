@@ -13,7 +13,7 @@ export default [
     },
     // 2. Add the rules you want to enforce
     rules: {
-      "no-unused-vars": "error",
+      "no-unused-vars": ["error", { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_"  }],
       "prefer-const": "error",
       "no-var": "error",
       "eqeqeq": "error"

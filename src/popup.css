@@ -76,28 +76,6 @@ button:hover {
     color: white;
 }
 
-/* Theme List items created by JS */
-.button {
-    background: #1e1e1e;
-    color: #00ff9d;
-    border-left: 4px solid #00ff9d;
-    margin-bottom: 8px;
-    padding: 12px;
-    font-size: 1rem;
-    cursor: pointer; /* Makes the 'hand' cursor appear */
-    transition: background 0.2s, transform 0.1s;
-    border-radius: 2px;
-}
-
-.button:hover {
-    background: #2a2a2a;
-    transform: translateX(5px); /* Subtle shift effect */
-}
-
-.button:active {
-    background: #00ff9d;
-    color: #121212;
-}
 
 .status {
     margin-top: 15px;

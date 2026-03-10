@@ -400,7 +400,7 @@ async function handleRemoveTheme(themeId, groupName) {
 // move theme drop handler
 async function moveThemeToGroup(themeId, themeName, targetGroupName) {
     const data = await browser.storage.local.get('userThemes');
-    let savedThemes = data.userThemes || [];
+    const savedThemes = data.userThemes || [];
     
     const existingIndex = savedThemes.findIndex(t => t.id === themeId);
     
@@ -418,6 +418,7 @@ async function moveThemeToGroup(themeId, themeName, targetGroupName) {
     initializePopup();
 }
 // AI prompt: jest isn't using the popup.js for my test file what do I need?
+/* eslint-disable no-undef */
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         initializePopup, buildMenuItem, saveTheme, handleDeleteGroup, handleRemoveTheme,
@@ -427,3 +428,4 @@ if (typeof module !== 'undefined' && module.exports) {
         setLockedInTheme: (v) => { lockedInTheme = v; },
     };
 }
+/* eslint-enable no-undef */
