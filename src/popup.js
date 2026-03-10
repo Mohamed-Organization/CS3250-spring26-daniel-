@@ -28,18 +28,20 @@ async function initializePopup() {
         currentDiv.removeChild(currentDiv.firstChild);
     }
 
-    // 3. Create a Sorting Object (The "Group Map")
-    const themeGroups = {};
-    savedThemes.forEach(savedItem => {
-        const groupName = savedItem.group.toUpperCase(); 
-        if (!themeGroups[groupName]) {
-            themeGroups[groupName] = [];
-        }
-        const match = installedThemes.find(t => t.id === savedItem.id);
-        if (match) {
-            themeGroups[groupName].push(match);
-        }
-    });
+  // 3. Create a Sorting Object (The "Group Map")
+  const themeGroups = {};
+  savedThemes.forEach(savedItem => {
+      const groupName = savedItem.group.toUpperCase(); 
+      const match = installedThemes.find(t => t.id === savedItem.id);
+      
+      // Only create the folder array if the theme is actually installed!
+      if (match) {
+          if (!themeGroups[groupName]) {
+              themeGroups[groupName] = [];
+          }
+          themeGroups[groupName].push(match);
+      }
+  });
 
     // 4. Build the Expandable UI (Accordion)
     if (Object.keys(themeGroups).length === 0) {
@@ -344,4 +346,14 @@ async function moveThemeToGroup(themeId, themeName, targetGroupName) {
     
     await browser.storage.local.set({ userThemes: savedThemes });
     initializePopup();
+}
+// AI prompt: jest isn't using the popup.js for my test file what do I need?
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        initializePopup, buildMenuItem, saveTheme, handleDeleteGroup, handleRemoveTheme,
+        getOriginalThemeId: () => originalThemeId,
+        getLockedInTheme: () => lockedInTheme,
+        setOriginalThemeId: (v) => { originalThemeId = v; },
+        setLockedInTheme: (v) => { lockedInTheme = v; },
+    };
 }
