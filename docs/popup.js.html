@@ -1,4 +1,32 @@
-'use strict';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: popup.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: popup.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>'use strict';
 
 /**
  * @file popup.js
@@ -38,7 +66,7 @@ let lockedInTheme = null;   // Remembers what theme you actually clicked
  * - Adds "Ungrouped Themes" (installed themes not in storage) at the bottom.
  *
  * @async
- * @returns {Promise<void>} Resolves after the UI has been fully rebuilt.
+ * @returns {Promise&lt;void>} Resolves after the UI has been fully rebuilt.
  */
 // this function has some asistance from ai
 async function initializePopup() {
@@ -59,7 +87,7 @@ async function initializePopup() {
 
   // 3. Create a Sorting Object (The "Group Map")
   // { [GROUPNAME_UPPER]: [themeAddOnObj, themeAddOnObj, ...] }
-  /** @type {Record<string, Array<Object>>} */
+  /** @type {Record&lt;string, Array&lt;Object>>} */
   const themeGroups = {};
   savedThemes.forEach(savedItem => {
       const groupName = savedItem.group.toUpperCase(); 
@@ -243,9 +271,9 @@ function buildMenuItem(theme) {
     // HOVER: Show a quick preview without changing settings permanently
     btn.addEventListener('mouseenter', async () => {
         const allAddons = await browser.management.getAll();
-        const currentActive = allAddons.find(a => a.type === 'theme' && a.enabled);
+        const currentActive = allAddons.find(a => a.type === 'theme' &amp;&amp; a.enabled);
         
-        if (currentActive && currentActive.id !== theme.id) {
+        if (currentActive &amp;&amp; currentActive.id !== theme.id) {
             originalThemeId = currentActive.id; // Remember where we started
         }
         await browser.management.setEnabled(theme.id, true);
@@ -284,7 +312,7 @@ function buildMenuItem(theme) {
  * - Rebuilds the popup UI by calling initializePopup().
  *
  * @async
- * @returns {Promise<void>} Resolves after saving and refreshing the UI.
+ * @returns {Promise&lt;void>} Resolves after saving and refreshing the UI.
  */
 async function saveTheme() {
     const groupInput = document.getElementById('group-name').value;
@@ -334,7 +362,7 @@ if (shutdown) {
  *
  * @async
  * @param {string} groupName - The group/category name (usually uppercase in your UI).
- * @returns {Promise<void>} Resolves after updating storage and refreshing the UI.
+ * @returns {Promise&lt;void>} Resolves after updating storage and refreshing the UI.
  */
 async function handleDeleteGroup(groupName) {
     // A simple pop-up to make sure you don't delete your hard work by accident
@@ -366,7 +394,7 @@ async function handleDeleteGroup(groupName) {
  * @async
  * @param {string} themeId - The theme add-on ID to remove from storage.
  * @param {string} groupName - The group/category name that theme belongs to.
- * @returns {Promise<void>} Resolves after updating storage and refreshing the UI.
+ * @returns {Promise&lt;void>} Resolves after updating storage and refreshing the UI.
  */
 async function handleRemoveTheme(themeId, groupName) {
     // Step 1: Grab the saved list
@@ -380,7 +408,7 @@ async function handleRemoveTheme(themeId, groupName) {
         const sameGroup = (theme.group.toUpperCase() === groupName.toUpperCase());
         
         // Only return true if it's NOT the exact one we want to remove
-        return !(sameId && sameGroup);
+        return !(sameId &amp;&amp; sameGroup);
     });
     
     // Step 3: Save and refresh the UI
@@ -395,7 +423,7 @@ async function handleRemoveTheme(themeId, groupName) {
  * @param {string} themeId - The add-on ID of the theme being moved.
  * @param {string} themeName - The display name of the theme being moved.
  * @param {string} targetGroupName - The group name to move the theme into.
- * @returns {Promise<void>} Resolves after updating storage and refreshing the UI.
+ * @returns {Promise&lt;void>} Resolves after updating storage and refreshing the UI.
  */
 // move theme drop handler
 async function moveThemeToGroup(themeId, themeName, targetGroupName) {
@@ -418,7 +446,7 @@ async function moveThemeToGroup(themeId, themeName, targetGroupName) {
     initializePopup();
 }
 // AI prompt: jest isn't using the popup.js for my test file what do I need?
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' &amp;&amp; module.exports) {
     module.exports = {
         initializePopup, buildMenuItem, saveTheme, handleDeleteGroup, handleRemoveTheme,
         getOriginalThemeId: () => originalThemeId,
@@ -426,4 +454,26 @@ if (typeof module !== 'undefined' && module.exports) {
         setOriginalThemeId: (v) => { originalThemeId = v; },
         setLockedInTheme: (v) => { lockedInTheme = v; },
     };
-}
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#buildMenuItem">buildMenuItem</a></li><li><a href="global.html#handleDeleteGroup">handleDeleteGroup</a></li><li><a href="global.html#handleRemoveTheme">handleRemoveTheme</a></li><li><a href="global.html#initializePopup">initializePopup</a></li><li><a href="global.html#moveThemeToGroup">moveThemeToGroup</a></li><li><a href="global.html#originalThemeId">originalThemeId</a></li><li><a href="global.html#saveTheme">saveTheme</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.5</a> on Mon Mar 09 2026 21:59:05 GMT-0600 (Mountain Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
